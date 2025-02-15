@@ -1,9 +1,6 @@
 package pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -72,5 +69,18 @@ public class OrderPage {
         setAddress(address);
         selectMetroStation(metroStation);
         setPhone(phone);
+    }
+
+//    ========================================================================================== //
+//      Метод проверяет, отображается ли сообщение об ошибке оформления заказа.
+//      Если элемент с текстом "Ошибка оформления" найден, возвращает true.
+//      Если элемент отсутствует (NoSuchElementException), возвращает false.
+//    ========================================================================================== //
+    public boolean isErrorMessageDisplayed() {
+        try {
+            return driver.findElement(By.xpath("//*[contains(text(),'Ошибка оформления')]")).isDisplayed();
+        } catch (NoSuchElementException e) {
+            return false; // Если элемент не найден, ошибка не отображается
+        }
     }
 }

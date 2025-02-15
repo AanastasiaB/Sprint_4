@@ -1,14 +1,10 @@
 package tests;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
 import pages.MainPage;
 import pages.OrderPage;
-import utils.DriverManager;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,8 +12,7 @@ import java.util.Collection;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
-public class OrderPageTests {
-    private WebDriver driver;
+public class OrderPageTests extends BaseTest {
 
     // Параметры для теста
     private final String firstName;
@@ -46,12 +41,6 @@ public class OrderPageTests {
         });
     }
 
-    @Before
-    public void setUp() {
-        driver = DriverManager.getDriver("chrome");
-        driver.get("https://qa-scooter.praktikum-services.ru/");
-    }
-
     @Test
     public void testOrderWithDataset() {
         MainPage mainPage = new MainPage(driver);
@@ -72,12 +61,13 @@ public class OrderPageTests {
 
         // Проверка, что кнопка "Далее" доступна для взаимодействия
         orderPage.clickNextButton();
+
+
+//    ========================================================================================== //
+//    Проверка, что после попытки оформить заказ в Chrome появляется сообщение об ошибке.
+//    Тест должен падать, если ошибка оформления не отображается.
+//    ========================================================================================== //
+        assertTrue("Ожидалась ошибка оформления заказа в Chrome", orderPage.isErrorMessageDisplayed());
     }
 
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
 }

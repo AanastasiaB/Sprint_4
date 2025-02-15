@@ -10,11 +10,24 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
 public class MainPage {
+
     private WebDriver driver;
 
     // Локаторы
     private By orderButtonTop = By.cssSelector("button.Button_Button__ra12g");
     private By orderButtonBottom = By.cssSelector(".Home_FinishButton__1_cWm .Button_Button__ra12g");
+
+// ========================================================================================= //
+// Поля хранят шаблоны XPath для поиска элементов на странице FAQ.
+// Они используются в методах для динамического формирования XPath,
+// заменяя %d на нужный индекс вопроса или ответа.
+// Это делает код более читаемым и переиспользуемым.
+// ========================================================================================= //
+
+    // Локаторы для блока FAQ
+    private String questionXPathTemplate = "(//div[@data-accordion-component='Accordion']//*[contains(@class, 'accordion__button')])[%d]";
+    private String answerXPathTemplate = "(//div[@data-accordion-component='Accordion']//*[contains(@class, 'accordion__panel')])[%d]";
+
 
     public MainPage(WebDriver driver) {
         this.driver = driver;
@@ -30,6 +43,35 @@ public class MainPage {
         WebElement button = wait.until(ExpectedConditions.elementToBeClickable(orderButtonBottom));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", button);
         button.click();
+    }
+
+
+    // ================================================================= //
+    // Методы из FAQPage (объединены с MainPage)
+    // ================================================================= //
+
+    public void clickQuestion(int questionIndex) {
+        String questionXPath = String.format(questionXPathTemplate, questionIndex);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement question = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(questionXPath)));
+
+        // Скролл к элементу, чтобы убедиться, что он в зоне видимости
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", question);
+
+        // Клик по элементу
+        question.click();
+    }
+
+//    ========================================================================================== //
+//    Ожидание visibilityOfElementLocated – тест не упадёт, если элемент ещё не появился.
+//    Тест будет работать стабильно, даже если сайт немного медленный.
+//    ========================================================================================== //
+    public String getAnswerText(int questionIndex) {
+        String answerXPath = String.format(answerXPathTemplate, questionIndex);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement answerElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(answerXPath)));
+
+        return answerElement.getText();
     }
 
 }

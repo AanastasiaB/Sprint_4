@@ -1,38 +1,86 @@
 package tests;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
-import pages.FAQPage;
-import utils.DriverManager;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import pages.MainPage;
 
-import static org.junit.Assert.assertFalse;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
-public class FAQTests {
-    private WebDriver driver;
+import static org.junit.Assert.assertEquals;
 
-    @Before
-    public void setUp() {
-        driver = DriverManager.getDriver("chrome");
-        driver.get("https://qa-scooter.praktikum-services.ru/");
+// ========================================================================================== //
+// Параметризация теста с `@RunWith(Parameterized.class)` позволяет запускать один и тот же
+// тест несколько раз с разными входными данными. Вместо `for`-цикла, тест автоматически
+// выполняется для каждого значения из списка `@Parameterized.Parameters`.
+//
+// В данном случае тест `testFAQDropDown()` запускается 5 раз, каждый раз с разным `questionIndex`.
+
+// Раньше использовался `for (int i = 1; i <= 5; i++)`, но теперь тест параметризован.
+// Вместо `for` каждый тест запускается отдельно с параметром `questionIndex`, переданным
+// из `@Parameterized.Parameters`. Теперь ошибки в одном тесте не влияют на другие.
+// ========================================================================================== //
+
+@RunWith(Parameterized.class)
+public class FAQTests extends BaseTest {
+
+    private final int questionIndex;
+
+    // ==================================================================== //
+    // Список ожидаемых ответов для каждого вопроса.
+    // Ответы хранятся в порядке соответствия номерам вопросов FAQ.
+    // expectedAnswers.get(n) вернёт ответ для (n+1)-го вопроса.
+    // ==================================================================== //
+    private static final List<String> expectedAnswers = Arrays.asList(
+            "Сутки — 400 рублей. Оплата курьеру — наличными или картой.",
+            "Пока что у нас так: один заказ — один самокат. Если хотите покататься с друзьями, можете просто сделать " +
+                    "несколько заказов — один за другим.",
+            "Допустим, вы оформляете заказ на 8 мая. Мы привозим самокат 8 мая в течение дня. Отсчёт времени аренды " +
+                    "начинается с момента, когда вы оплатите заказ курьеру. Если мы привезли самокат " +
+                    "8 мая в 20:30, суточная аренда закончится 9 мая в 20:30.",
+            "Только начиная с завтрашнего дня. Но скоро станем расторопнее.",
+            "Пока что нет! Но если что-то срочное — всегда можно позвонить в поддержку по красивому номеру 1010.",
+            "Самокат приезжает к вам с полной зарядкой. Этого хватает на восемь суток — даже если будете кататься без передышек и во сне. Зарядка не понадобится.",
+            "Да, пока самокат не привезли. Штрафа не будет, объяснительной записки тоже не попросим. Все же свои.",
+            "Да, обязательно. Всем самокатов! И Москве, и Московской области."
+    );
+
+    public FAQTests(int questionIndex) {
+        this.questionIndex = questionIndex;
     }
 
+    @Parameterized.Parameters
+    public static Collection<Object[]> getData() {
+        return Arrays.asList(new Object[][]{
+                {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8} // Параметризация вопросов
+        });
+    }
+
+//    ========================================================================================== //
+//    Проверяем не только isEmpty(), но и trim().length() > 0.
+//    Логируем найденный ответ (чтобы видеть, какой именно текст возвращается).
+//    assertNotNull - добавлен
+//    Перед тем, как получать текст ответа, необходимо вызвать метод clickQuestion(i), чтобы элемент стал видимым.
+//    ========================================================================================== //
     @Test
     public void testFAQDropDown() {
-        FAQPage faqPage = new FAQPage(driver);
+        MainPage faqPage = new MainPage(driver);
 
-        for (int i = 1; i <= 8; i++) {
-            faqPage.clickQuestion(i);
-            String answer = faqPage.getAnswerText(i);
-            assertFalse("Ответ для вопроса " + i + " пустой!", answer.isEmpty());
-        }
-    }
 
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        faqPage.clickQuestion(questionIndex); // Кликаем по вопросу
+        String answer = faqPage.getAnswerText(questionIndex);
+
+        System.out.println("Вопрос " + questionIndex + ": " + answer); // Лог ответа
+
+// ==================================================================== //
+// Сравниваем полученный ответ с ожидаемым.
+// expectedAnswers.get(questionIndex - 1) – получаем ответ из списка по индексу (начинается с 0).
+// Если ответ не совпадает, тест упадёт с сообщением "Ответ для вопроса X не совпадает!".
+// ==================================================================== //
+        assertEquals("Ответ для вопроса " + questionIndex + " не совпадает!",
+                expectedAnswers.get(questionIndex - 1),  // Индексы списка начинаются с 0
+                answer);
     }
 }
