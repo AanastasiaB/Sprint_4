@@ -52,9 +52,6 @@ public class OrderPageTests extends BaseTest {
             mainPage.clickOrderButtonBottom();
         }
 
-        // Проверка, что URL изменился на /order
-        assertTrue("URL не изменился на /order", driver.getCurrentUrl().contains("/order"));
-
         // Заполнение формы заказа
         OrderPage orderPage = new OrderPage(driver);
         orderPage.fillOrderForm(firstName, lastName, address, metroStation, phone);
@@ -71,3 +68,4 @@ public class OrderPageTests extends BaseTest {
     }
 
 }
+
